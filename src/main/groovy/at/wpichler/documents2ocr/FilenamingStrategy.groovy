@@ -11,65 +11,20 @@ class FilenamingStrategy {
 
     def log = LoggerFactory.getLogger(this.getClass())
 
-    def keywords = [
-            //FIRMEN
-            ["Hellobank", "Hello bank", "Finanzadmin", "HYPO", "FiNUM", "dieFinanzplaner", "Sparkasse", "PayLife", "Mastercard", "Allianz", "Continentale", "EUROPA", "muki", "Roland"],
-            ["Valida"],
-            ["OOEGKK", "EDER", "Mazda"],
-            ["Finanzamt"],
-            ["NOTAR", "Neundlinger"],
 
-            //AUTO
-            ["JAHRESSERVICE", "UU 867DG"],
+    def keywords = new ClassPathResource("keywords").getFile()
+            .listFiles()
+            .findAll { it.name.endsWith(".txt") }
+            .collectMany { it.readLines() }
+            .findAll { it.length() > 1 } //ignore empty lines
+            .collect { it.toLowerCase() }
+            .toUnique()
 
-            //DOKUMENTEN TYPE
-            ["RECHNUNG", "Prämienrechnung", "Antrag", "Polizze", "Versicherungsschein", "Nachtrag", "Finanzamtsbescheinigung", "KESt-Finanzamtsbescheinigung", "KESt-Verlustausgleich", "Bescheinigung", "Nutzungsvereinbarungen", "Infoblatt", "Jahresmitteilung", "Wertanpassung", "Mitteilung", "Information", "Beratungsprotokoll"],
-            ["Arbeitsvertrag", "Arbeitnehmer/innen-Veranlagung", "Arbeitnehmerveranlagung"],
-            ["Testament", "Beschluss"],
-
-            //OTHER KEYWORDS
-            ["Konto", "ecx.io"],
-            ["Indexanpassung", "Bonus-Malus—System", "Folgeprämie", "Verbraucherpreisindex", "Baukosten-Index"],
-            ["Kontoinformation", "Mitarbeitervorsorge", "Abfertigung"],
-            ["Steuern", "Jährlicher", "Jährliche", "Überschussbeteiligung", "Versicherungssteuer"],
-            ["Bankverbindung"],
-            ["Betreuung"],
-            ["Wertpapier", "KESt"],
-            ["Beratung", "Empfohlen", "Empfehlung"],
-            ["Wertpapieraufstellung", "Aufstellung", "Auszug"],
-            ["Passwort", "Fondsbestimmungen", "Änderung", "Änderungen"],
-            ["Kundeninformation", "Wichtig", "Rechtsform", "Einlagensicherung"],
-            ["Kontoauszug", "Abrechnung", "Saldo"],
-            ["Verständigung", "Wechsel", "Konto", "Kartenauftrag", "Privatkonto", "Komfortkonto", "Kontovertrag", "Allgemeine Bedingungen", "Girokonto", "Electronic Banking", "Elba", "Antragsteller"],
-            ["Bausparvertrag", "Bausparer"],
-            ["Verbraucherpreisindex", "Anpassung", "Kündigung"],
-            ["Transaktionsliste", "Depot", "Verkauf", "Kauf", "Wertpapiergeschäft", "Kapitalentnahme", "Haus", "Vermögensübersicht", "Sparkonto"],
-            ["George", "netbanking", "Finanzmanager"],
-            ["Preiserhöhung", "Kreditkarte", "s Kreditkarte", "Erhöhung", "erhöhen"],
-            ["s Fonds Plan Vertrag", "Wertpapierdepot", "Konditionen", "Inflationsrate"],
-            ["Depotbestand", "Kundengespräch", "Transaktion"],
-            ["Verlassenschaft", "VERLASSENSCHAFTSSACHE", "RECHTSMITTELBELEHRUNG"],
-            ["Änderungsmeldung", "Aenderungsmeldung", "Aenderung", "Bestaetigung", "Dienstgeber"],
-            ["Anwartschaft", "Selbstständigenvorsorge", "Vorsorgekasse"],
-            ["Beiträge"],
-            ["VERTRAGSINFORMATIONEN"],
-            ["Zusammenführung", "Abfertigungskonten"],
-            ["RECHNUNG", "BEGUTACHTUNGSPLAKETTE", "JAHRESSERVICE", "Rückholaktion"],
-            ["Steuererklärung", "Steuerinformation", "Gutschrift", "Steuergutschrift"],
-            ["Rückholaktion", "Austausch", "vorläufig"],
-            ["KFZ"],
-
-            //INSURANCE
-            ["Unfallversicherung", "BU", "FLV", "BU-Versicherung", "Berufsunfähigkeits-Versicherung", "Risikolebensversicherung", "Versicherungsvertrag", "Haushaltsversicherung", "KFZ-Versicherung", "Privat-Rechtsschutz"],
-            // WORK
-            ["Gleitzeit", "Vereinbarung", "Überstündenpauschale"]
-            //].collectMany { list -> [list.collect { it.toLowerCase() }] }
-    ].collectMany { list -> list.collect { it.toLowerCase() } }.toUnique()
-
-    //TODO: include phrases
-    def phrases = ["Julia Tutschek": "julia", "s Fonds Plan": "sFondsPlan"]
-
-    def synonyms = ["Berufsunfähigkeits-Versicherung": "BU", "BU-Versicherung": "BU"]
+    //TODO: include synonyms
+    def synonyms = [
+            "Max Mustermann" : "max"
+            , "Kraftfahrzeug": "KFZ"
+    ]
 
     String suggestName(File file, String text) {
         def words = findRelevantWords(text)
